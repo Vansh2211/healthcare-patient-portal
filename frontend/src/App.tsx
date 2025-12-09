@@ -2,9 +2,15 @@ import React, { useEffect, useState } from "react";
 
 const API = "http://localhost:5000/documents";
 
+interface FileData {
+  id: string;
+  filename: string;
+  filesize: number;
+}
+
 function App() {
-  const [selected, setSelected] = useState(null);
-  const [files, setFiles] = useState([]);
+  const [selected, setSelected] = useState<File | null>(null);
+  const [files, setFiles] = useState<FileData[]>([]);
 
   const fetchFiles = async () => {
     const res = await fetch(API);
@@ -30,10 +36,14 @@ function App() {
     fetchFiles();
   };
 
-  const deleteFile = async (id) => {
+interface DeleteFileFn {
+    (id: string): Promise<void>;
+}
+
+const deleteFile: DeleteFileFn = async (id) => {
     await fetch(`${API}/${id}`, { method: "DELETE" });
     fetchFiles();
-  };
+};
 
   return (
     <div style={{ padding: 20 }}>
@@ -42,7 +52,10 @@ function App() {
       <input
         type="file"
         accept="application/pdf"
-        onChange={(e) => setSelected(e.target.files[0])}
+        onChange={(e) => {
+          const files = e.target.files;
+          setSelected(files && files.length > 0 ? files[0] : null);
+        }}
       />
 
       <button onClick={uploadFile}>Upload</button>

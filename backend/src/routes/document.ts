@@ -24,7 +24,7 @@ router.post("/upload", upload.single("file"), (req, res) => {
     "INSERT INTO documents (filename, filepath, filesize, created_at) VALUES (?, ?, ?, datetime('now'))"
   );
 
-  stmt.run(file.originalname, file.path, file.size, function () {
+  stmt.run(file.originalname, file.path, file.size, function (this: any) {
     res.json({
       message: "Uploaded",
       document: {
@@ -46,22 +46,30 @@ router.get("/", (req, res) => {
 
 // DOWNLOAD DOCUMENT
 router.get("/:id", (req, res) => {
-  db.get("SELECT * FROM documents WHERE id = ?", [req.params.id], (err, row) => {
-    if (!row) return res.status(404).send("Not found");
-    res.download(row.filepath, row.filename);
-  });
+  db.get(
+    "SELECT * FROM documents WHERE id = ?",
+    [req.params.id],
+    (err, row: { filepath: string; filename: string } | undefined) => {
+      if (!row) return res.status(404).send("Not found");
+      res.download(row.filepath, row.filename);
+    }
+  );
 });
 
 // DELETE DOCUMENT
 router.delete("/:id", (req, res) => {
-  db.get("SELECT * FROM documents WHERE id = ?", [req.params.id], (err, row) => {
-    if (!row) return res.status(404).send("Not found");
+  db.get(
+    "SELECT * FROM documents WHERE id = ?",
+    [req.params.id],
+    (err, row: { filepath: string } | undefined) => {
+      if (!row) return res.status(404).send("Not found");
 
-    fs.unlinkSync(row.filepath);
+      fs.unlinkSync(row.filepath);
 
-    db.run("DELETE FROM documents WHERE id = ?", [req.params.id]);
-    res.json({ message: "Deleted" });
-  });
+      db.run("DELETE FROM documents WHERE id = ?", [req.params.id]);
+      res.json({ message: "Deleted" });
+    }
+  );
 });
 
 export default router;
