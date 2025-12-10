@@ -39,7 +39,15 @@ router.post("/upload", upload.single("file"), (req, res) => {
 
 // LIST DOCUMENTS
 router.get("/", (req, res) => {
-  db.all("SELECT * FROM documents", (err, rows) => {
+  interface Document {
+    id: number;
+    filename: string;
+    filepath: string;
+    filesize: number;
+    created_at: string;
+  }
+
+  db.all("SELECT * FROM documents", (err, rows: Document[]) => {
     res.json(rows);
   });
 });
