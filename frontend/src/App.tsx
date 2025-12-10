@@ -4,7 +4,7 @@ const API = "http://localhost:5000/documents";
 
 function App() {
   const [selected, setSelected] = useState<File | null>(null);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<Document[]>([]);
 
   const fetchFiles = async () => {
     const res = await fetch(API);
@@ -31,12 +31,14 @@ function App() {
   };
 
   interface Document {
-    id: string;
-    filename: string;
-    filesize: number;
+    id: number;
+  filename: string;
+  filesize: number;
+  filepath: string;
+  created_at: string;
   }
 
-  const deleteFile = async (id: string): Promise<void> => {
+  const deleteFile = async (id: number): Promise<void> => {
     await fetch(`${API}/${id}`, { method: "DELETE" });
     fetchFiles();
   };
