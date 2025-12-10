@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const API = "http://localhost:5000/documents";
 
-interface FileData {
-  id: string;
-  filename: string;
-  filesize: number;
-}
-
 function App() {
   const [selected, setSelected] = useState<File | null>(null);
-  const [files, setFiles] = useState<FileData[]>([]);
+  const [files, setFiles] = useState([]);
 
   const fetchFiles = async () => {
     const res = await fetch(API);
@@ -36,14 +30,16 @@ function App() {
     fetchFiles();
   };
 
-interface DeleteFileFn {
-    (id: string): Promise<void>;
-}
+  interface Document {
+    id: string;
+    filename: string;
+    filesize: number;
+  }
 
-const deleteFile: DeleteFileFn = async (id) => {
+  const deleteFile = async (id: string): Promise<void> => {
     await fetch(`${API}/${id}`, { method: "DELETE" });
     fetchFiles();
-};
+  };
 
   return (
     <div style={{ padding: 20 }}>
@@ -52,24 +48,18 @@ const deleteFile: DeleteFileFn = async (id) => {
       <input
         type="file"
         accept="application/pdf"
-        onChange={(e) => {
-          const files = e.target.files;
-          setSelected(files && files.length > 0 ? files[0] : null);
-        }}
+        onChange={(e) => setSelected(e.target.files?.[0] || null)}
       />
-
       <button onClick={uploadFile}>Upload</button>
 
-      <h3>Uploaded Documents</h3>
+      <h3>Uploaded Files</h3>
       <ul>
         {files.map((f) => (
           <li key={f.id}>
             {f.filename} ({(f.filesize / 1024).toFixed(1)} KB)
-            &nbsp;
             <button onClick={() => window.open(`${API}/${f.id}`)}>
               Download
             </button>
-            &nbsp;
             <button onClick={() => deleteFile(f.id)}>
               Delete
             </button>
